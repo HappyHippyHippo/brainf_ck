@@ -3,22 +3,28 @@ package internal
 import "fmt"
 
 var (
-	// ErrUnmatchedJumpStart @todo doc
+	// ErrUnmatchedJumpStart is a code error signaling that
+	// a jump operation does not have a terminating ']'.
 	ErrUnmatchedJumpStart = fmt.Errorf("unmached jump start")
 
-	// ErrUnmatchedJumpEnd @todo doc
+	// ErrUnmatchedJumpEnd is a code error signaling that
+	// a jump operation does not have a starting '['.
 	ErrUnmatchedJumpEnd = fmt.Errorf("unmached jump end")
 
-	// ErrInvalidTapePosition @todo doc
+	// ErrInvalidTapePosition is an error signaling that
+	// the code tried to access an invalid tape position.
 	ErrInvalidTapePosition = fmt.Errorf("invalid tape position")
 
-	// ErrUnreachableMemory @todo doc
+	// ErrUnreachableMemory is an error signaling that
+	// the code tried to access an invalid memory position (less than zero).
 	ErrUnreachableMemory = fmt.Errorf("unreachable memory address")
 
-	// ErrUnderflow @todo doc
+	// ErrUnderflow is an error signaling that
+	// the code tried to decrement a value under the 0 value.
 	ErrUnderflow = fmt.Errorf("value underflow")
 
-	// ErrOverflow @todo doc
+	// ErrOverflow is an error signaling that
+	// the code tried to increment a value over the 255 value.
 	ErrOverflow = fmt.Errorf("value overflow")
 )
 

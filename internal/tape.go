@@ -5,10 +5,9 @@ import (
 	"os"
 )
 
-// Tape @todo doc
+// Tape is an interface of a code input structure,
+// and store it as a sequential stream of operations.
 type Tape interface {
-	io.Closer
-
 	Load(file string) error
 	Length() uint64
 	At(pos uint64) (Instruction, error)
@@ -18,27 +17,23 @@ type tape []Instruction
 
 var _ Tape = &tape{}
 
-// NewTape @todo doc
+// NewTape instantiate a new tape instance.
 func NewTape() Tape {
 	return &tape{}
 }
 
-// Close @todo doc
-func (t tape) Close() error {
-	return nil
-}
-
-// Load @todo doc
+// Load will try to read an input file and store the
+// code as a stream of instructions.
 func (t *tape) Load(file string) error {
 	mapper := map[byte]Instruction{
-		'>': {op: OpPointerInc},
-		'<': {op: OpPointerDec},
-		'+': {op: OpDataInc},
-		'-': {op: OpDataDec},
-		'.': {op: OpOutput},
-		',': {op: OpInput},
-		'[': {op: OpJumpStart},
-		']': {op: OpJumpEnd},
+		'>': {op: opPointerInc},
+		'<': {op: opPointerDec},
+		'+': {op: opDataInc},
+		'-': {op: opDataDec},
+		'.': {op: opOutput},
+		',': {op: opInput},
+		'[': {op: opJumpStart},
+		']': {op: opJumpEnd},
 	}
 
 	// open file
@@ -75,10 +70,10 @@ func (t *tape) Load(file string) error {
 	var stack []uint64
 	for pos, i := range *t {
 		switch i.op {
-		case OpJumpStart:
+		case opJumpStart:
 			stack = append(stack, uint64(pos))
 			break
-		case OpJumpEnd:
+		case opJumpEnd:
 			if len(stack) == 0 {
 				return errUnmatchedJumpEnd(uint64(pos))
 			}
@@ -101,11 +96,13 @@ func (t *tape) Load(file string) error {
 	return nil
 }
 
+// Length retrieves the number of instructions on the tape.
 func (t *tape) Length() uint64 {
 	return uint64(len(*t))
 }
 
-// At @todo doc
+// At retrieves the instruction in the tape instruction stream
+// at the required position.
 func (t *tape) At(pos uint64) (Instruction, error) {
 	if pos >= uint64(len(*t)) {
 		return Instruction{}, errInvalidTapePosition(pos)

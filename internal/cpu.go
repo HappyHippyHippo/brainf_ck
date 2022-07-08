@@ -2,14 +2,11 @@ package internal
 
 import (
 	"bufio"
-	"io"
 	"os"
 )
 
-// CPU @todo doc
+// CPU is an interface to a tape executor.
 type CPU interface {
-	io.Closer
-
 	Run(Tape) error
 }
 
@@ -22,32 +19,32 @@ type cpu struct {
 
 var _ CPU = &cpu{}
 
-// NewCPU @todo doc
+// NewCPU instantiate a new CPU instance.
 func NewCPU(mem Memory) CPU {
 	c := &cpu{
 		mem: mem,
 		ops: map[uint8]func(instr Instruction) error{},
 	}
 
-	c.ops[OpPointerInc] = func(_ Instruction) error {
+	c.ops[opPointerInc] = func(_ Instruction) error {
 		return c.mem.Inc()
 	}
-	c.ops[OpPointerDec] = func(_ Instruction) error {
+	c.ops[opPointerDec] = func(_ Instruction) error {
 		return c.mem.Dec()
 	}
-	c.ops[OpDataInc] = func(instr Instruction) error {
+	c.ops[opDataInc] = func(instr Instruction) error {
 		if c.mem.Add() != nil {
 			return errOverflow(instr.pos)
 		}
 		return nil
 	}
-	c.ops[OpDataDec] = func(instr Instruction) error {
+	c.ops[opDataDec] = func(instr Instruction) error {
 		if c.mem.Sub() != nil {
 			return errUnderflow(instr.pos)
 		}
 		return nil
 	}
-	c.ops[OpOutput] = func(_ Instruction) error {
+	c.ops[opOutput] = func(_ Instruction) error {
 		writer := bufio.NewWriter(os.Stdout)
 		e := writer.WriteByte(c.mem.Get())
 		if e != nil {
@@ -55,7 +52,7 @@ func NewCPU(mem Memory) CPU {
 		}
 		return writer.Flush()
 	}
-	c.ops[OpInput] = func(_ Instruction) error {
+	c.ops[opInput] = func(_ Instruction) error {
 		reader := bufio.NewReader(os.Stdin)
 		b, e := reader.ReadByte()
 		if e != nil {
@@ -64,13 +61,13 @@ func NewCPU(mem Memory) CPU {
 		c.mem.Set(b)
 		return nil
 	}
-	c.ops[OpJumpStart] = func(instr Instruction) error {
+	c.ops[opJumpStart] = func(instr Instruction) error {
 		if c.mem.Get() == 0 {
 			c.pos = instr.target
 		}
 		return nil
 	}
-	c.ops[OpJumpEnd] = func(instr Instruction) error {
+	c.ops[opJumpEnd] = func(instr Instruction) error {
 		if c.mem.Get() != 0 {
 			c.pos = instr.target
 		}
@@ -80,12 +77,7 @@ func NewCPU(mem Memory) CPU {
 	return c
 }
 
-// Close @todo doc
-func (c cpu) Close() error {
-	return nil
-}
-
-// Run @todo doc
+// Run will execute the given tape instructions.
 func (c *cpu) Run(t Tape) error {
 	// initialize cpu
 	c.pos = 0

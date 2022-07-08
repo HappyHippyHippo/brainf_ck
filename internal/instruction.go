@@ -1,6 +1,6 @@
 package internal
 
-// Instruction @todo doc
+// Instruction is a structure that holds a tape operation information.
 type Instruction struct {
 	op     uint8
 	pos    uint64
